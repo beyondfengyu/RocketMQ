@@ -80,6 +80,7 @@ public class NamesrvStartup {
             final NamesrvConfig namesrvConfig = new NamesrvConfig();
             final NettyServerConfig nettyServerConfig = new NettyServerConfig();
             nettyServerConfig.setListenPort(9876);
+            // -c path 参数用于加载指定的配置信息
             if (commandLine.hasOption('c')) {
                 String file = commandLine.getOptionValue('c');
                 if (file != null) {
@@ -93,7 +94,7 @@ public class NamesrvStartup {
                 }
             }
 
-
+            // -p 参数用于打印NameSrv配置信息
             if (commandLine.hasOption('p')) {
                 MixAll.printObjectProperties(null, namesrvConfig);
                 MixAll.printObjectProperties(null, nettyServerConfig);
@@ -101,7 +102,8 @@ public class NamesrvStartup {
             }
 
             MixAll.properties2Object(ServerUtil.commandLine2Properties(commandLine), namesrvConfig);
-
+            //这里会判断系统是否已经设置ROCKET_HOME环境变量
+            //所以在启动NameSrv前需要设置ROCKET_HOME环境变量
             if (null == namesrvConfig.getRocketmqHome()) {
                 System.out.println("Please set the " + MixAll.ROCKETMQ_HOME_ENV
                         + " variable in your environment to match the location of the RocketMQ installation");
@@ -127,6 +129,7 @@ public class NamesrvStartup {
                 System.exit(-3);
             }
 
+            //注册进程钩子，确保JVM进程被kill -15杀掉前，NameSrv进程正常关闭
             Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
                 private volatile boolean hasShutdown = false;
                 private AtomicInteger shutdownTimes = new AtomicInteger(0);
