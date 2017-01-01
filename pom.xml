@@ -186,6 +186,7 @@
                     <compilerVersion>${maven.compiler.source}</compilerVersion>
                     <showDeprecation>true</showDeprecation>
                     <showWarnings>true</showWarnings>
+                    <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
             <plugin>

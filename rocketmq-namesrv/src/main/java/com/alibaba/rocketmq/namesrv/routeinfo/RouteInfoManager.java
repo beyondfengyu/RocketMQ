@@ -133,13 +133,13 @@ public class RouteInfoManager {
                     brokerData.setBrokerName(brokerName);
                     HashMap<Long, String> brokerAddrs = new HashMap<Long, String>();
                     brokerData.setBrokerAddrs(brokerAddrs);
-
+                    // TODO 加入新的broker时，BrokerData不用设置broker对应的clustername？？？
                     this.brokerAddrTable.put(brokerName, brokerData);
                 }
                 String oldAddr = brokerData.getBrokerAddrs().put(brokerId, brokerAddr);
                 registerFirst = registerFirst || (null == oldAddr);
 
-
+                // 只有Master角色broker才能更新topic信息
                 if (null != topicConfigWrapper //
                         && MixAll.MASTER_ID == brokerId) {
                     if (this.isBrokerTopicConfigChanged(brokerAddr, topicConfigWrapper.getDataVersion())//
@@ -148,6 +148,7 @@ public class RouteInfoManager {
                                 topicConfigWrapper.getTopicConfigTable();
                         if (tcTable != null) {
                             for(Map.Entry<String,TopicConfig> entry: tcTable.entrySet()){
+                                // 注册或者更新broker队列的信息
                                 this.createAndUpdateQueueData(brokerName, entry.getValue());
                             }
                         }
@@ -174,7 +175,7 @@ public class RouteInfoManager {
                     }
                 }
 
-
+                // 设置slave角色的broker的master地址和ha地址
                 if (MixAll.MASTER_ID != brokerId) {
                     String masterAddr = brokerData.getBrokerAddrs().get(MixAll.MASTER_ID);
                     if (masterAddr != null) {

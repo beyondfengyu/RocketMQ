@@ -104,6 +104,8 @@ public class NamesrvStartup {
             MixAll.properties2Object(ServerUtil.commandLine2Properties(commandLine), namesrvConfig);
             //这里会判断系统是否已经设置ROCKET_HOME环境变量
             //所以在启动NameSrv前需要设置ROCKET_HOME环境变量
+            // TODO 强制指定ROCKETMQ_HOME，仅用于测试
+            namesrvConfig.setRocketmqHome("E:\\github\\RocketMQ\\target\\alibaba-rocketmq-broker\\alibaba-rocketmq");
             if (null == namesrvConfig.getRocketmqHome()) {
                 System.out.println("Please set the " + MixAll.ROCKETMQ_HOME_ENV
                         + " variable in your environment to match the location of the RocketMQ installation");

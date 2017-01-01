@@ -159,13 +159,14 @@ public class BrokerStartup {
             }
 
             MixAll.properties2Object(ServerUtil.commandLine2Properties(commandLine), brokerConfig);
-
+            //TODO 强制指定ROCKETMQ_HOME，仅用于测试
+            brokerConfig.setRocketmqHome("E:\\github\\RocketMQ\\target\\alibaba-rocketmq-broker\\alibaba-rocketmq");
             if (null == brokerConfig.getRocketmqHome()) {
                 System.out.println("Please set the " + MixAll.ROCKETMQ_HOME_ENV
                         + " variable in your environment to match the location of the RocketMQ installation");
                 System.exit(-2);
             }
-
+            brokerConfig.setNamesrvAddr("localhost:9876");
             String namesrvAddr = brokerConfig.getNamesrvAddr();
             if (null != namesrvAddr) {
                 try {
