@@ -53,7 +53,11 @@ public class ClusterInfo extends RemotingSerializable {
         this.clusterAddrTable = clusterAddrTable;
     }
 
-
+    /**
+     * 获取集群名为@{cluster}的所有broker地址
+     * @param cluster
+     * @return
+     */
     public String[] retrieveAllAddrByCluster(String cluster) {
         List<String> addrs = new ArrayList<String>();
         if (clusterAddrTable.containsKey(cluster)) {
@@ -69,7 +73,10 @@ public class ClusterInfo extends RemotingSerializable {
         return addrs.toArray(new String[]{});
     }
 
-
+    /**
+     * 获取所有的集群名
+     * @return
+     */
     public String[] retrieveAllClusterNames() {
         return clusterAddrTable.keySet().toArray(new String[]{});
     }

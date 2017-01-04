@@ -42,6 +42,10 @@ import java.util.concurrent.atomic.AtomicLong;
 
 
 /**
+ * Namesrv节点请求消息的处理器，Netty服务器接收到消息后，把消息封装成RemotingCommand对象，
+ * 然后调用DefaultRequestProcessor的processRequest方法来处理消息。所以在实例化Netty服务器时，
+ * NamesrvController需要把DefaultRequestProcessor实例注册到Netty服务器。
+ *
  * @author shijia.wxr
  */
 public class DefaultRequestProcessor implements NettyRequestProcessor {

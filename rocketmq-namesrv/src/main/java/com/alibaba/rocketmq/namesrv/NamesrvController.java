@@ -41,11 +41,11 @@ import java.util.concurrent.TimeUnit;
  */
 public class NamesrvController {
     private static final Logger log = LoggerFactory.getLogger(LoggerName.NamesrvLoggerName);
-
+    // Namesrv相关的配置信息项
     private final NamesrvConfig namesrvConfig;
-
+    // Netty服务器相关的配置信息项
     private final NettyServerConfig nettyServerConfig;
-
+    // 用于执行定时任务
     private final ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryImpl(
             "NSScheduledThread"));
     private final KVConfigManager kvConfigManager;
@@ -71,13 +71,15 @@ public class NamesrvController {
 
         this.kvConfigManager.load();
 
-
+        // 实例化Netty通信服务器，负责底层的通信；
+        // 参数nettyServerConfig  配置Netty服务器；
+        // 参数brokerHousekeepingService  服务器channel事件监听器
         this.remotingServer = new NettyRemotingServer(this.nettyServerConfig, this.brokerHousekeepingService);
 
-
-        this.remotingExecutor =
-                Executors.newFixedThreadPool(nettyServerConfig.getServerWorkerThreads(), new ThreadFactoryImpl("RemotingExecutorThread_"));
-
+        // 业务线程池，用于避免业务阻塞
+        this.remotingExecutor = Executors.newFixedThreadPool(nettyServerConfig.getServerWorkerThreads(),
+                new ThreadFactoryImpl("RemotingExecutorThread_"));
+        // 注册处理器，用于处理服务器接收到的消息
         this.registerProcessor();
 
 
@@ -85,6 +87,7 @@ public class NamesrvController {
 
             @Override
             public void run() {
+                //定时扫描找出并关闭失效的Broker Channel
                 NamesrvController.this.routeInfoManager.scanNotActiveBroker();
             }
         }, 5, 10, TimeUnit.SECONDS);
@@ -100,7 +103,12 @@ public class NamesrvController {
         return true;
     }
 
-
+    /**
+     * 注册Netty服务器的处理器，Netty服务器会把接收到的消息交给处理器来处理；
+     * Server注册了一个NettyServerHandler对象，在NettyServerHandler对象里面调用processMessageReceived方法来处理
+     * 接收到的消息，依次跟踪下去，可以发现最终消息会交给DefaultRequestProcessor对象来处理。
+     *
+     */
     private void registerProcessor() {
         if (namesrvConfig.isClusterTest()) {
 

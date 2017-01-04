@@ -77,7 +77,7 @@ public class RemotingCommand {
     }
 
     /**
-
+     * RocketMQ的协议头
      */
     private int code;
     private LanguageCode language = LanguageCode.JAVA;
@@ -166,6 +166,8 @@ public class RemotingCommand {
     }
 
     public static RemotingCommand decode(final ByteBuffer byteBuffer) {
+        // protocol <length> <header length> <header data> <body data>
+        //            1        2               3             4
         int length = byteBuffer.limit();
         int oriHeaderLen = byteBuffer.getInt();
         int headerLength = getHeaderLength(oriHeaderLen);
@@ -240,6 +242,12 @@ public class RemotingCommand {
         this.customHeader = customHeader;
     }
 
+    /**
+     * 反射生成CommandCustomHeader实例，并把extField的值赋给CommandCustomHeader的字段
+     * @param classHeader
+     * @return
+     * @throws RemotingCommandException
+     */
     public CommandCustomHeader decodeCommandCustomHeader(Class<? extends CommandCustomHeader> classHeader) throws RemotingCommandException {
         CommandCustomHeader objectHeader;
         try {
@@ -300,6 +308,11 @@ public class RemotingCommand {
         return objectHeader;
     }
 
+    /**
+     * 缓存ClazzFields比通过Class获取ClazzFields的性能要高
+     * @param classHeader
+     * @return
+     */
     private Field[] getClazzFields(Class<? extends CommandCustomHeader> classHeader) {
         Field[] field = clazzFieldsCache.get(classHeader);
 
@@ -312,6 +325,11 @@ public class RemotingCommand {
         return field;
     }
 
+    /**
+     * 缓存Annotation比通过Field获取Annotation的性能要高
+     * @param field
+     * @return
+     */
     private Annotation getNotNullAnnotation(Field field) {
         Annotation annotation = notNullAnnotationCache.get(field);
 
@@ -324,6 +342,11 @@ public class RemotingCommand {
         return annotation;
     }
 
+    /**
+     * 缓存CanonicalName比通过Class获取CanonicalName的性能要高
+     * @param clazz
+     * @return
+     */
     private String getCanonicalName(Class clazz) {
         String name = canonicalNameCache.get(clazz);
 

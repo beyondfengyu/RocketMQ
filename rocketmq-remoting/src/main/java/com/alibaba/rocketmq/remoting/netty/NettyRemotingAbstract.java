@@ -94,23 +94,32 @@ public abstract class NettyRemotingAbstract {
         }
     }
 
+    /**
+     * 处理请求的消息
+     * @param ctx
+     * @param cmd 接收的消息统一被封装为cmd对象
+     */
     public void processRequestCommand(final ChannelHandlerContext ctx, final RemotingCommand cmd) {
         final Pair<NettyRequestProcessor, ExecutorService> matched = this.processorTable.get(cmd.getCode());
         final Pair<NettyRequestProcessor, ExecutorService> pair = null == matched ? this.defaultRequestProcessor : matched;
         final int opaque = cmd.getOpaque();
 
         if (pair != null) {
+            // 该Runnable对象会被放入业务线程池执行
+            // 即pair对象的ExecutorService
             Runnable run = new Runnable() {
                 @Override
                 public void run() {
                     try {
                         RPCHook rpcHook = NettyRemotingAbstract.this.getRPCHook();
                         if (rpcHook != null) {
+                            // rpcHook向前切入方法
                             rpcHook.doBeforeRequest(RemotingHelper.parseChannelRemoteAddr(ctx.channel()), cmd);
                         }
-
+                        // 调用NettyRequestProcessor处理请求
                         final RemotingCommand response = pair.getObject1().processRequest(ctx, cmd);
                         if (rpcHook != null) {
+                            // rpcHook向后切入方法
                             rpcHook.doAfterResponse(RemotingHelper.parseChannelRemoteAddr(ctx.channel()), cmd, response);
                         }
 
@@ -156,6 +165,7 @@ public abstract class NettyRemotingAbstract {
 
             try {
                 final RequestTask requestTask = new RequestTask(run, ctx.channel(), cmd);
+                // 请求构建成一个任务对象放入线程池执行
                 pair.getObject2().submit(requestTask);
             } catch (RejectedExecutionException e) {
                 if ((System.currentTimeMillis() % 10000) == 0) {
@@ -173,6 +183,9 @@ public abstract class NettyRemotingAbstract {
                 }
             }
         } else {
+            // 代码执行到这里是因为没有定义defaultRequestProcessor，
+            // 并且没有找到请求code相应的RequestProcessor来处理请求
+            // TODO 这里是否需要判断cmd.isOnewayRPC()的情况呢
             String error = " request type " + cmd.getCode() + " not supported";
             final RemotingCommand response =
                     RemotingCommand.createResponseCommand(RemotingSysResponseCode.REQUEST_CODE_NOT_SUPPORTED, error);
@@ -182,6 +195,12 @@ public abstract class NettyRemotingAbstract {
         }
     }
 
+    /**
+     * 处理响应的消息，如果此方法不能处理响应的消息，那么会交给scanResponseTable方法处理，
+     * scanResponseTable方法会被定时执行
+     * @param ctx
+     * @param cmd 接收的消息统一被封装为cmd对象
+     */
     public void processResponseCommand(ChannelHandlerContext ctx, RemotingCommand cmd) {
         final int opaque = cmd.getOpaque();
         final ResponseFuture responseFuture = responseTable.get(opaque);
@@ -235,6 +254,9 @@ public abstract class NettyRemotingAbstract {
 
     abstract public ExecutorService getCallbackExecutor();
 
+    /**
+     * 被定时执行，处理响应的消息
+     */
     public void scanResponseTable() {
         final List<ResponseFuture> rfList = new LinkedList<ResponseFuture>();
         Iterator<Entry<Integer, ResponseFuture>> it = this.responseTable.entrySet().iterator();

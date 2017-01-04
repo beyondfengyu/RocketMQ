@@ -19,7 +19,9 @@ package com.alibaba.rocketmq.remoting;
 
 import com.alibaba.rocketmq.remoting.protocol.RemotingCommand;
 
-
+/**
+ * RPCHook类似于AOP，在处理请求消息时提供向前或向后的方法切入
+ */
 public interface RPCHook {
     void doBeforeRequest(final String remoteAddr, final RemotingCommand request);
 
