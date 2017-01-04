@@ -220,6 +220,7 @@ public abstract class NettyRemotingAbstract {
                             @Override
                             public void run() {
                                 try {
+                                    // 执行回调函数
                                     responseFuture.executeInvokeCallback();
                                 } catch (Throwable e) {
                                     plog.warn("execute callback in executor exception, and callback throw", e);
@@ -274,6 +275,7 @@ public abstract class NettyRemotingAbstract {
 
         for (ResponseFuture rf : rfList) {
             try {
+                // 执行回调函数
                 rf.executeInvokeCallback();
             } catch (Throwable e) {
                 plog.warn("scanResponseTable, operationComplete Exception", e);
@@ -281,6 +283,16 @@ public abstract class NettyRemotingAbstract {
         }
     }
 
+    /**
+     * 发送消息，同步等待响应
+     * @param channel
+     * @param request
+     * @param timeoutMillis
+     * @return
+     * @throws InterruptedException
+     * @throws RemotingSendRequestException
+     * @throws RemotingTimeoutException
+     */
     public RemotingCommand invokeSyncImpl(final Channel channel, final RemotingCommand request, final long timeoutMillis)
             throws InterruptedException, RemotingSendRequestException, RemotingTimeoutException {
         final int opaque = request.getOpaque();
@@ -305,7 +317,7 @@ public abstract class NettyRemotingAbstract {
                     plog.warn("send a request command to channel <" + addr + "> failed.");
                 }
             });
-
+            // 阻塞等待响应
             RemotingCommand responseCommand = responseFuture.waitResponse(timeoutMillis);
             if (null == responseCommand) {
                 if (responseFuture.isSendRequestOK()) {
@@ -322,6 +334,17 @@ public abstract class NettyRemotingAbstract {
         }
     }
 
+    /**
+     * 发送消息，异步响应
+     * @param channel
+     * @param request
+     * @param timeoutMillis
+     * @param invokeCallback
+     * @throws InterruptedException
+     * @throws RemotingTooMuchRequestException
+     * @throws RemotingTimeoutException
+     * @throws RemotingSendRequestException
+     */
     public void invokeAsyncImpl(final Channel channel, final RemotingCommand request, final long timeoutMillis,
                                 final InvokeCallback invokeCallback)
             throws InterruptedException, RemotingTooMuchRequestException, RemotingTimeoutException, RemotingSendRequestException {
@@ -373,6 +396,16 @@ public abstract class NettyRemotingAbstract {
         }
     }
 
+    /**
+     * 发送消息，不接收响应
+     * @param channel
+     * @param request
+     * @param timeoutMillis
+     * @throws InterruptedException
+     * @throws RemotingTooMuchRequestException
+     * @throws RemotingTimeoutException
+     * @throws RemotingSendRequestException
+     */
     public void invokeOnewayImpl(final Channel channel, final RemotingCommand request, final long timeoutMillis)
             throws InterruptedException, RemotingTooMuchRequestException, RemotingTimeoutException, RemotingSendRequestException {
         request.markOnewayRPC();
@@ -410,6 +443,9 @@ public abstract class NettyRemotingAbstract {
         }
     }
 
+    /**
+     * 处理Channel通道的各种事件
+     */
     class NettyEventExecuter extends ServiceThread {
         private final LinkedBlockingQueue<NettyEvent> eventQueue = new LinkedBlockingQueue<NettyEvent>();
         private final int maxSize = 10000;

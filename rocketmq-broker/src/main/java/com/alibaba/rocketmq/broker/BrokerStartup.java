@@ -166,6 +166,8 @@ public class BrokerStartup {
                 System.exit(-2);
             }
 
+            // TODO 测试时强制指定namesrvAddr
+            brokerConfig.setNamesrvAddr("localhost:9876");
             String namesrvAddr = brokerConfig.getNamesrvAddr();
             if (null != namesrvAddr) {
                 try {

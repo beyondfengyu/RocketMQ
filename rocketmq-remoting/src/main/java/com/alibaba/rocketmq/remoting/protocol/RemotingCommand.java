@@ -82,6 +82,10 @@ public class RemotingCommand {
     private int code;
     private LanguageCode language = LanguageCode.JAVA;
     private int version = 0;
+    /**
+     * 异步执行回调时需要使用opauqe来区分响应的结果，
+     * 因此每个RemotingCommand的opaque都必须是唯一的
+     */
     private int opaque = requestId.getAndIncrement();
     private int flag = 0;
     private String remark;
