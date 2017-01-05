@@ -71,7 +71,7 @@ public class NamesrvController {
 
         this.kvConfigManager.load();
 
-        // 实例化Netty通信服务器，负责底层的通信；
+        // 实例化Netty通信服务器，负责底层的通信，建议先看完NettyRemotingServer源码再往下看；
         // 参数nettyServerConfig  配置Netty服务器；
         // 参数brokerHousekeepingService  服务器channel事件监听器
         this.remotingServer = new NettyRemotingServer(this.nettyServerConfig, this.brokerHousekeepingService);

@@ -317,14 +317,15 @@ public abstract class NettyRemotingAbstract {
                     plog.warn("send a request command to channel <" + addr + "> failed.");
                 }
             });
-            // 阻塞等待响应
+            // 阻塞等待响应，直到responseFuture.putResponse方法，或者超时
             RemotingCommand responseCommand = responseFuture.waitResponse(timeoutMillis);
             if (null == responseCommand) {
                 if (responseFuture.isSendRequestOK()) {
                     throw new RemotingTimeoutException(RemotingHelper.parseSocketAddressAddr(addr), timeoutMillis,
                             responseFuture.getCause());
                 } else {
-                    throw new RemotingSendRequestException(RemotingHelper.parseSocketAddressAddr(addr), responseFuture.getCause());
+                    throw new RemotingSendRequestException(RemotingHelper.parseSocketAddressAddr(addr),
+                            responseFuture.getCause());
                 }
             }
 
@@ -346,8 +347,8 @@ public abstract class NettyRemotingAbstract {
      * @throws RemotingSendRequestException
      */
     public void invokeAsyncImpl(final Channel channel, final RemotingCommand request, final long timeoutMillis,
-                                final InvokeCallback invokeCallback)
-            throws InterruptedException, RemotingTooMuchRequestException, RemotingTimeoutException, RemotingSendRequestException {
+                                final InvokeCallback invokeCallback) throws InterruptedException,
+            RemotingTooMuchRequestException, RemotingTimeoutException, RemotingSendRequestException {
         final int opaque = request.getOpaque();
         boolean acquired = this.semaphoreAsync.tryAcquire(timeoutMillis, TimeUnit.MILLISECONDS);
         if (acquired) {

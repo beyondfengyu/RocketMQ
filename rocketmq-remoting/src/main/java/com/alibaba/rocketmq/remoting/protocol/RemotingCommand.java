@@ -40,7 +40,7 @@ public class RemotingCommand {
     public static final String SERIALIZE_TYPE_PROPERTY = "rocketmq.serialize.type";
     public static final String SERIALIZE_TYPE_ENV = "ROCKETMQ_SERIALIZE_TYPE";
     private static final Logger log = LoggerFactory.getLogger(RemotingHelper.RemotingLogName);
-    private static final int RPC_TYPE = 0; // 0, REQUEST_COMMAND
+    private static final int RPC_TYPE = 0;   // 0, REQUEST_COMMAND
     private static final int RPC_ONEWAY = 1; // 0, RPC
 
     private static final Map<Class<? extends CommandCustomHeader>, Field[]> clazzFieldsCache =
@@ -89,16 +89,22 @@ public class RemotingCommand {
     private int opaque = requestId.getAndIncrement();
     private int flag = 0;
     private String remark;
+    /**
+     * 固定头部扩展字段
+     */
     private HashMap<String, String> extFields;
+    /**
+     * 自定义头部，各个协议可以在此处定义自己的头部字段
+     */
     private transient CommandCustomHeader customHeader;
+    /**
+     *  有效载体
+     */
+    private transient byte[] body;
     /**
 
      */
     private SerializeType serializeTypeCurrentRPC = serializeTypeConfigInThisServer;
-    /**
-
-     */
-    private transient byte[] body;
 
 
     protected RemotingCommand() {
