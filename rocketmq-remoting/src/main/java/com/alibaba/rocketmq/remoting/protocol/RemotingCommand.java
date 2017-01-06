@@ -41,7 +41,7 @@ public class RemotingCommand {
     public static final String SERIALIZE_TYPE_ENV = "ROCKETMQ_SERIALIZE_TYPE";
     private static final Logger log = LoggerFactory.getLogger(RemotingHelper.RemotingLogName);
     private static final int RPC_TYPE = 0;   // 0, REQUEST_COMMAND
-    private static final int RPC_ONEWAY = 1; // 0, RPC
+    private static final int RPC_ONEWAY = 1; // 1, RPC_ONEWAY
 
     private static final Map<Class<? extends CommandCustomHeader>, Field[]> clazzFieldsCache =
             new HashMap<Class<? extends CommandCustomHeader>, Field[]>();
@@ -179,6 +179,8 @@ public class RemotingCommand {
         // protocol <length> <header length> <header data> <body data>
         //            1        2               3             4
         int length = byteBuffer.limit();
+        // 头部长度字段被编码
+        // 编码过程参考markProtocolType方法
         int oriHeaderLen = byteBuffer.getInt();
         int headerLength = getHeaderLength(oriHeaderLen);
 
@@ -412,10 +414,18 @@ public class RemotingCommand {
         }
     }
 
+    /**
+     * 把长度字段与编码类型编码，用一个4字节数组存储
+     * @param source 一般为长度字段
+     * @param type  编码的类型，目前有两种：JSON、ROCKETMQ
+     * @return
+     */
     public static byte[] markProtocolType(int source, SerializeType type) {
         byte[] result = new byte[4];
-
+        // 第一个字节存储编码类型
         result[0] = type.getCode();
+        // 后面三个字节存储source的最低3个字节
+        // 可以看出source的最大值只能为(2^24 - 1)
         result[1] = (byte) ((source >> 16) & 0xFF);
         result[2] = (byte) ((source >> 8) & 0xFF);
         result[3] = (byte) (source & 0xFF);

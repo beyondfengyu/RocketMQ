@@ -23,6 +23,8 @@ import java.io.File;
 
 
 /**
+ * 这个类有很多的变量的值使用了ImportantField注解的方式来注入
+ *
  * @author vongosling
  * @author shijia.wxr
  */

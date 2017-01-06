@@ -299,7 +299,7 @@ public class BrokerController {
                 } else {
                     this.updateMasterHAServerAddrPeriodically = true;
                 }
-
+                // slave broker定时每60秒同步Master broker
                 this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
 
                     @Override
@@ -329,6 +329,10 @@ public class BrokerController {
         return result;
     }
 
+    /**
+     * 注册处理器
+     * 服务器会调用处理器来处理接收到的请求
+     */
     public void registerProcessor() {
         /**
          * SendMessageProcessor
@@ -581,7 +585,7 @@ public class BrokerController {
         if (this.fastRemotingServer != null) {
             this.fastRemotingServer.start();
         }
-
+        //broker作为客户端启动
         if (this.brokerOuterAPI != null) {
             this.brokerOuterAPI.start();
         }
@@ -599,7 +603,8 @@ public class BrokerController {
         }
 
         this.registerBrokerAll(true, false);
-
+        // 定时向所有namesrv发送心跳，
+        // 时间间隔为30秒
         this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
 
             @Override
@@ -621,6 +626,11 @@ public class BrokerController {
         }
     }
 
+    /**
+     * 注册Broker的topic信息到所有的namesrv
+     * @param checkOrderConfig
+     * @param oneway
+     */
     public synchronized void registerBrokerAll(final boolean checkOrderConfig, boolean oneway) {
         TopicConfigSerializeWrapper topicConfigWrapper = this.getTopicConfigManager().buildTopicConfigSerializeWrapper();
 
