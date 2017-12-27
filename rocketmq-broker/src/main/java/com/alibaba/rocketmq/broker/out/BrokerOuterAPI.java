@@ -71,7 +71,10 @@ public class BrokerOuterAPI {
         this.remotingClient.shutdown();
     }
 
-
+    /**
+     * 通过HTTP请求URL来获取Namesrv的地址列表
+     * @return
+     */
     public String fetchNameServerAddr() {
         try {
             String addrs = this.topAddressing.fetchNSAddr();
@@ -102,6 +105,20 @@ public class BrokerOuterAPI {
         }
     }
 
+    /**
+     *  注册Broker的topic信息到所有的Namesrv，
+     *  该方法会被定时调用
+     * @param clusterName
+     * @param brokerAddr
+     * @param brokerName
+     * @param brokerId
+     * @param haServerAddr
+     * @param topicConfigWrapper
+     * @param filterServerList
+     * @param oneway
+     * @param timeoutMills
+     * @return
+     */
     public RegisterBrokerResult registerBrokerAll(//
                                                   final String clusterName, // 1
                                                   final String brokerAddr, // 2

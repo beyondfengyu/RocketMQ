@@ -154,7 +154,8 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
                 });
 
         ServerBootstrap childHandler = //
-                this.serverBootstrap.group(this.eventLoopGroupBoss, this.eventLoopGroupSelector).channel(NioServerSocketChannel.class)
+                this.serverBootstrap.group(this.eventLoopGroupBoss, this.eventLoopGroupSelector)
+                        .channel(NioServerSocketChannel.class)
                         //
                         .option(ChannelOption.SO_BACKLOG, 1024)
                         //
@@ -173,11 +174,10 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
                             @Override
                             public void initChannel(SocketChannel ch) throws Exception {
                                 ch.pipeline().addLast(
-                                        //
                                         defaultEventExecutorGroup, //
-                                        new NettyEncoder(), //
-                                        new NettyDecoder(), //
-                                        new IdleStateHandler(0, 0, nettyServerConfig.getServerChannelMaxIdleTimeSeconds()), //
+                                        new NettyEncoder(),        //
+                                        new NettyDecoder(),        //
+                                        new IdleStateHandler(0, 0, nettyServerConfig.getServerChannelMaxIdleTimeSeconds()), // 连接空闲超时处理器
                                         new NettyConnetManageHandler(), //
                                         new NettyServerHandler());
                             }

@@ -603,7 +603,7 @@ public class BrokerController {
         }
 
         this.registerBrokerAll(true, false);
-        // 定时向所有namesrv发送心跳，
+        // 定时向所有Namesrv注册Broker的topic信息
         // 时间间隔为30秒
         this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
 
