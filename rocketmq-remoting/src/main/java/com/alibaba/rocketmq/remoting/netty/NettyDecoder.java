@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -39,6 +40,8 @@ public class NettyDecoder extends LengthFieldBasedFrameDecoder {
 
 
     public NettyDecoder() {
+        // 设置解包的协议长度域为4字节，解包后的消息不保留长度域
+        // 参数设置细节参考http://www.wolfbe.com/detail/201610/380.html
         super(FRAME_MAX_LENGTH, 0, 4, 0, 4);
     }
 
@@ -65,5 +68,23 @@ public class NettyDecoder extends LengthFieldBasedFrameDecoder {
         }
 
         return null;
+    }
+
+    public static void main(String[] args) {
+        int bits = 999999999 >> 24;
+        bits = bits & 0xff;
+        int bitt = 999999999 & 0xff;
+        int flag = bits & 0xff;
+        flag |= bits;
+
+        bits = 1;
+        bits = bits >> 24 & 0xff;
+        System.out.println(bits);
+        System.out.println(Integer.toBinaryString(bits));
+
+        bits = -1;
+        bits = bits >> 24 & 0xff;
+        System.out.println(bits);
+        System.out.println(Integer.toBinaryString(bits));
     }
 }

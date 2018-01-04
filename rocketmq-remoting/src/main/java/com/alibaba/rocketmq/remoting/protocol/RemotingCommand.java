@@ -179,8 +179,8 @@ public class RemotingCommand {
         // protocol <length> <header length> <header data> <body data>
         //            1        2               3             4
         int length = byteBuffer.limit();
-        // 头部长度字段被编码
-        // 编码过程参考markProtocolType方法
+
+        // 协议头部长度域已经被编码，编码过程参考markProtocolType()方法
         int oriHeaderLen = byteBuffer.getInt();
         int headerLength = getHeaderLength(oriHeaderLen);
 
@@ -417,7 +417,7 @@ public class RemotingCommand {
     /**
      * 把长度字段与编码类型编码，用一个4字节数组存储
      * @param source 一般为长度字段
-     * @param type  编码的类型，目前有两种：JSON、ROCKETMQ
+     * @param type   编码的类型，目前有两种：JSON、ROCKETMQ
      * @return
      */
     public static byte[] markProtocolType(int source, SerializeType type) {
